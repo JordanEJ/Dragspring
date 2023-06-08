@@ -84,10 +84,15 @@ static UIRefreshControl *createRefreshControlWithListController(PSListController
 		}
 
 		dispatch_async(dispatch_get_main_queue(), ^{
-			[refreshControl endRefreshing];
-			NSTask *t = [[[NSTask alloc] init] autorelease];
-			[t setLaunchPath:@"/usr/bin/sbreload"];
-			[t launch];
+    			pid_t pid;
+    			const char* args[] = {"killall", "SpringBoard", NULL};
+    			if ([[NSFileManager defaultManager] fileExistsAtPath:@"/usr/bin/killall"]) {
+        			posix_spawn(&pid, "usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+    			} else {
+        			posix_spawn(&pid, "/var/jb/usr/bin/killall", NULL, NULL, (char* const*)args, NULL);
+    }
+    
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)preferencesNotification, NULL, NULL, TRUE);
 		});
 
 	});
